@@ -516,29 +516,29 @@ function DrawingCanvas({ image }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentStroke]);
 
-    const drawPoint = (x, y) => {
-      const ctx = ctxRef.current;
-      if (!ctx) return;
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, 2 * Math.PI);
-      ctx.fillStyle = "white";
-      ctx.fill();
-      ctx.stroke();
-    };
+  const drawPoint = (x, y) => {
+    const ctx = ctxRef.current;
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.stroke();
+  };
 
-    const connectPoints = (points) => {
-      const ctx = ctxRef.current;
-      if (!ctx || points.length <= 1) return;
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      points.forEach((point) => {
-        ctx.lineTo(point.x, point.y);
-      });
-      ctx.stroke();
-    };
+  const connectPoints = (points) => {
+    const ctx = ctxRef.current;
+    if (!ctx || points.length <= 1) return;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    points.forEach((point) => {
+      ctx.lineTo(point.x, point.y);
+    });
+    ctx.stroke();
+  };
 
-const handleCanvasClick = (e) => {
-    if (editMode || !isImageLoaded) return;
+  const handleCanvasClick = (e) => {
+    if (!token || editMode || !isImageLoaded) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -551,10 +551,10 @@ const handleCanvasClick = (e) => {
 
     drawPoint(x, y);
     connectPoints(newStroke);
-};
+  };
 
   const handleMouseDown = (e) => {
-    if (!editMode || !isImageLoaded) return;
+    if (!token || !editMode || !isImageLoaded) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -570,60 +570,42 @@ const handleCanvasClick = (e) => {
   };
 
   const handleMouseMove = (e) => {
-      // If the user is not dragging a point or no point is selected, exit the function
-      if (!isDragging || editingIndex === null) return;
+    if (!token || !isDragging || editingIndex === null) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-      // Get the bounding rectangle of the canvas to calculate cursor coordinates
-      const rect = canvasRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left; // X-coordinate relative to the canvas
-      const y = e.clientY - rect.top;  // Y-coordinate relative to the canvas
-
-      // Create a copy of the strokes array to modify without mutating state directly
-      const updatedStrokes = [...strokes];
-
-      // Update the specific point being dragged with the new coordinates
-      updatedStrokes[editingIndex.strokeIndex][editingIndex.pointIndex] = { x, y };
-
-      // Update state with the modified strokes array
-      setStrokes(updatedStrokes);
-
-      // Redraw the canvas to reflect the changes
-      redrawCanvas();
+    const updatedStrokes = [...strokes];
+    updatedStrokes[editingIndex.strokeIndex][editingIndex.pointIndex] = { x, y };
+    setStrokes(updatedStrokes);
+    redrawCanvas();
   };
 
   const handleMouseUp = () => {
-      setEditingIndex(null);  // Clear the selected point
-      setIsDragging(false);   // Disable dragging mode
+    setEditingIndex(null);
+    setIsDragging(false);
   };
 
-const saveCoordinates = () => {
-  // Use only finished strokes (ignore currentStroke)
-  // image
-  const coordinatesText = strokes
-    .map((stroke) =>
-      stroke.map(point => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join("\n")
-    )
-    .join("\n\n"); // Ensure double newlines between strokes
+  const saveCoordinates = () => {
+    if (!token) return;
+    const coordinatesText = strokes
+      .map((stroke) =>
+        stroke.map(point => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join("\n")
+      )
+      .join("\n\n");
 
-  // Create blob and download link
-  const blob = new Blob([coordinatesText], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'drawing_coordinates.txt';
+    const blob = new Blob([coordinatesText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'drawing_coordinates.txt';
 
-  // Trigger download
-  document.body.appendChild(link);
-  link.click();
+    document.body.appendChild(link);
+    link.click();
 
-  // Cleanup
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-
-  if (!token) {
-      return <p>Please log in to start drawing.</p>;
-    }
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="canvas-container">
@@ -636,21 +618,22 @@ const saveCoordinates = () => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        // onMouseLeave={handleMouseUp}
         onMouseEnter={() => setIsDragging(editingIndex !== null)}
         tabIndex="0"
       />
-      <div className="flex flex-col gap-2 mt-4">
-        <div>
-          Edit Mode: {editMode ? 'ON' : 'OFF'} (Press 'E' to toggle)
+      {token && (
+        <div className="flex flex-col gap-2 mt-4">
+          <div>
+            Edit Mode: {editMode ? 'ON' : 'OFF'} (Press 'E' to toggle)
+          </div>
+          <button
+            onClick={saveCoordinates}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
+          >
+            Save Drawing as Coordinates
+          </button>
         </div>
-        <button
-          onClick={saveCoordinates}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
-        >
-          Save Drawing as Coordinates
-        </button>
-      </div>
+      )}
     </div>
   );
 }

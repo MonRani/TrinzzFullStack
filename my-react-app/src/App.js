@@ -27,10 +27,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route
-            path="/"
-            element={token ? <Home /> : <Navigate to="/login" />}
-          />
+          <Route path="/" element={<Home />} />
           <Route
             path="/view-drawing"
             element={token ? <ViewDrawing /> : <Navigate to="/login" />}

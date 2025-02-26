@@ -35,16 +35,16 @@ export default Home;
 */
 
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { AuthContext } from "../App"; // Import AuthContext
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../App";
 import ImageGrid from "../components/ImageGrid";
 import DrawingCanvas from "../components/DrawingCanvas";
 import "../styles/App.css";
 
 function Home() {
   const [selectedImage, setSelectedImage] = useState(null);
-  const navigate = useNavigate(); // Initialize useNavigate
-  const { token, logout } = useContext(AuthContext); // Initialize useContext
+  const navigate = useNavigate();
+  const { token, logout } = useContext(AuthContext);
 
   const handleSelectImage = (image) => {
     setSelectedImage(image);
@@ -57,7 +57,19 @@ function Home() {
       </div>
       <div className="drawing-canvas-container">
         {selectedImage ? (
-          <DrawingCanvas image={selectedImage} />
+          token ? (
+            <DrawingCanvas image={selectedImage} />
+          ) : (
+            <div>
+              <p>Please log in to start drawing.</p>
+              <button
+                className="login-button"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </button>
+            </div>
+          )
         ) : (
           <p>Select an image to start drawing.</p>
         )}
