@@ -1,0 +1,33 @@
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  height: 100%;
+  overflow: auto;
+}
+
+canvas {
+  border: 2px solid black;
+  max-width: 100%;
+  max-height: 80vh;
+  background-color: white; /* Ensure clear background */
+}
+
+button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: blue;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 4px;
+  text-align: center; /* Center align text */
+  width: 100%; /* Ensure the button takes full width */
+}
+
+button:hover {
+  background-color: darkblue;
+}
