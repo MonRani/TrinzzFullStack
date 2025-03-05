@@ -21,4 +21,3 @@ def read_root():
 # Include other routers
 app.include_router(auth.router)
 app.include_router(images.router)
-app.include_router(drawings.router)

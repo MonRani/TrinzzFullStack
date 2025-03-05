@@ -51,14 +51,14 @@ export const login = async (username, password) => {
 };
 
 
-export const saveDrawing = async (drawing, token) => {
-  const response = await fetch(`${API_URL}/drawings`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(drawing),
-  });
-  return response.json();
-};
+//export const saveDrawing = async (drawing, token) => {
+//  const response = await fetch(`${API_URL}/drawings`, {
+//    method: "POST",
+//    headers: {
+//      "Content-Type": "application/json",
+//      Authorization: `Bearer ${token}`,
+//    },
+//    body: JSON.stringify(drawing),
+//  });
+//  return response.json();
+//};
